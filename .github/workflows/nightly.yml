@@ -1,0 +1,114 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '30 7 * * *'  # 7:30 AM UTC daily
+  workflow_dispatch:
+
+env:
+  CARGO: /home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo
+  RUSTC: /home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc
+
+jobs:
+  nightly:
+    name: Nightly Validation
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Environment
+        run: |
+          set -euo pipefail
+          echo "=== Nightly Build $(date -u +%Y-%m-%d) ==="
+          $RUSTC --version
+          $CARGO --version
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ghostfetch-nightly
+
+      - name: Full build
+        run: $CARGO build --release
+
+      - name: Full test sweep
+        run: $CARGO test
+
+      - name: Clippy strict (pedantic)
+        run: |
+          $CARGO clippy --release -- \
+            -W clippy::all \
+            -W clippy::pedantic \
+            -A clippy::needless-borrows-for-generic-args \
+            -A clippy::single-char-add-str \
+            -A clippy::redundant-field-names \
+            -A clippy::module-name-repetitions \
+            -A clippy::too-many-lines \
+            -A clippy::missing-errors-doc \
+            -A clippy::missing-panics-doc \
+            -A clippy::must-use-candidate \
+            -A clippy::struct-excessive-bools \
+            -A clippy::similar-names \
+            -A clippy::doc-markdown \
+            -A clippy::wildcard-imports
+
+      - name: Format check
+        run: $CARGO fmt --check
+
+      - name: Extended CLI Tests
+        run: |
+          set -euo pipefail
+          GHOSTFETCH="./target/release/ghostfetch"
+
+          echo "=== Extended CLI Tests ==="
+          $GHOSTFETCH --version
+          $GHOSTFETCH --help
+
+          echo ""
+          echo "=== All Distro Logos ==="
+          for distro in arch cachyos endeavouros bazzite nobara ubuntu debian fedora pop manjaro mint opensuse gentoo nixos void alpine proxmox; do
+            echo "Testing logo: $distro"
+            $GHOSTFETCH --logo "$distro" --off > /dev/null
+          done
+
+          echo ""
+          echo "=== Flag Combinations ==="
+          $GHOSTFETCH --off > /dev/null
+          $GHOSTFETCH --no-color > /dev/null
+          $GHOSTFETCH --off --no-color > /dev/null
+          $GHOSTFETCH --all --off > /dev/null
+
+          echo ""
+          echo "=== Repeated runs (stability check) ==="
+          for i in 1 2 3 4 5; do
+            $GHOSTFETCH --off > /dev/null 2>&1
+            echo "Run $i: OK"
+          done
+
+          echo ""
+          echo "Extended CLI tests passed"
+
+      - name: Binary size check
+        run: |
+          set -euo pipefail
+          GHOSTFETCH="./target/release/ghostfetch"
+          SIZE=$(stat -c%s "$GHOSTFETCH" 2>/dev/null || stat -f%z "$GHOSTFETCH")
+          SIZE_KB=$((SIZE / 1024))
+          echo "Binary size: ${SIZE_KB}KB ($SIZE bytes)"
+          if [ "$SIZE_KB" -gt 10240 ]; then
+            echo "::warning::Binary size exceeds 10MB"
+          fi
+
+      - name: Nightly Summary
+        run: |
+          echo "### Nightly Build $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | Pass |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | Pass |" >> $GITHUB_STEP_SUMMARY
+          echo "| Clippy (pedantic) | Pass |" >> $GITHUB_STEP_SUMMARY
+          echo "| CLI Tests | Pass |" >> $GITHUB_STEP_SUMMARY
+          echo "| Binary | $(ls -lh ./target/release/ghostfetch | awk '{print $5}') |" >> $GITHUB_STEP_SUMMARY

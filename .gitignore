@@ -1,6 +1,16 @@
 /target
+target/
 Cargo.lock
 **/*.rs.bk
 TODO.md
 DEVELOPMENT_ROADMAP.md
 CLAUDE.md
+TODO.md 
+NOTES.md
+archive/
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target

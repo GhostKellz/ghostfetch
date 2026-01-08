@@ -1,0 +1,27 @@
+Source: ghostfetch
+Section: utils
+Priority: optional
+Maintainer: Christopher Kelley <ckelley@ghostkellz.sh>
+Build-Depends: debhelper-compat (= 13), rustc, cargo
+Standards-Version: 4.6.0
+Homepage: https://github.com/ghostkellz/ghostfetch
+Vcs-Browser: https://github.com/ghostkellz/ghostfetch
+Vcs-Git: https://github.com/ghostkellz/ghostfetch.git
+Rules-Requires-Root: no
+
+Package: ghostfetch
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: dmidecode
+Description: Fast, minimal system fetch tool for Linux
+ ghostfetch is a modern system information tool written in Rust,
+ inspired by neofetch, fastfetch, and betterfetch.
+ .
+ Features include:
+  - Distro-specific ASCII logos with colors
+  - Monitor detection with model names, resolution, refresh rate, HDR
+  - Display server detection (Wayland/X11)
+  - Shell prompt detection (Starship, Powerlevel10k, Oh My Zsh)
+  - Terminal font detection
+  - Multiple GPU support with discrete/integrated labels
+  - RAM speed detection (requires dmidecode)

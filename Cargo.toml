@@ -1,0 +1,21 @@
+[package]
+name = "ghostfetch"
+version = "0.1.0"
+edition = "2024"
+description = "A fast, minimal system fetch tool for Linux - inspired by neofetch"
+license = "MIT"
+repository = "https://github.com/ghostkellz/ghostfetch"
+keywords = ["fetch", "system-info", "cli", "arch-linux"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+sysinfo = "0.32"
+colored = "2"
+whoami = "1"
+clap = { version = "4", features = ["derive"] }
+libc = "0.2"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1

@@ -1,0 +1,12 @@
+ghostfetch (0.1.0-1) unstable; urgency=medium
+
+  * Initial release
+  * Distro-specific ASCII logos with colors
+  * Monitor detection with model names, resolution, refresh rate, HDR
+  * Display server detection (Wayland/X11)
+  * Shell prompt detection (Starship, Powerlevel10k, Oh My Zsh)
+  * Terminal font detection
+  * Multiple GPU support
+  * RAM speed detection
+
+ -- Christopher Kelley <ckelley@ghostkellz.sh>  Tue, 07 Jan 2026 12:00:00 -0600

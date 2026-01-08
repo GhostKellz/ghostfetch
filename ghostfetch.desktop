@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=ghostfetch
+GenericName=System Information
+Comment=A fast, minimal system fetch tool for Linux
+Exec=ghostfetch
+Icon=ghostfetch
+Terminal=true
+Type=Application
+Categories=System;Monitor;ConsoleOnly;
+Keywords=fetch;system;info;neofetch;

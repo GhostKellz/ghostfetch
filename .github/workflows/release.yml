@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO: /home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo
+  RUSTC: /home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc
+
+jobs:
+  release-linux:
+    name: Build Linux Release
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Environment
+        run: |
+          echo "=== Linux Release Build ==="
+          echo "Tag: ${{ github.ref_name }}"
+          $RUSTC --version
+          $CARGO --version
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ghostfetch-release-linux
+
+      - name: Run Tests
+        run: $CARGO test
+
+      - name: Build Linux Release
+        run: $CARGO build --release
+
+      - name: Create Linux Archive
+        run: |
+          set -euo pipefail
+          VERSION="${{ github.ref_name }}"
+          TARGET="x86_64-unknown-linux-gnu"
+          ARCHIVE_DIR="ghostfetch-${VERSION}-${TARGET}"
+          BINARY="./target/release/ghostfetch"
+
+          mkdir -p "$ARCHIVE_DIR"
+          cp "$BINARY" "$ARCHIVE_DIR/ghostfetch"
+          cp README.md "$ARCHIVE_DIR/" 2>/dev/null || true
+          cp LICENSE "$ARCHIVE_DIR/" 2>/dev/null || true
+          cp CHANGELOG.md "$ARCHIVE_DIR/" 2>/dev/null || true
+          cp install.sh "$ARCHIVE_DIR/" 2>/dev/null || true
+          cp ghostfetch.desktop "$ARCHIVE_DIR/" 2>/dev/null || true
+
+          # Include icons
+          mkdir -p "$ARCHIVE_DIR/icons"
+          cp -r assets/icons/hicolor "$ARCHIVE_DIR/icons/" 2>/dev/null || true
+
+          tar -czvf "ghostfetch-${VERSION}-${TARGET}.tar.gz" "$ARCHIVE_DIR"
+
+          echo "=== Linux Archive Contents ==="
+          tar -tzvf "ghostfetch-${VERSION}-${TARGET}.tar.gz"
+          ls -lh "ghostfetch-${VERSION}-${TARGET}.tar.gz"
+
+      - name: Generate SHA256 Checksum
+        run: |
+          VERSION="${{ github.ref_name }}"
+          TARGET="x86_64-unknown-linux-gnu"
+          sha256sum "ghostfetch-${VERSION}-${TARGET}.tar.gz" > "ghostfetch-${VERSION}-${TARGET}.tar.gz.sha256"
+          cat "ghostfetch-${VERSION}-${TARGET}.tar.gz.sha256"
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: |
+            ghostfetch-${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz
+            ghostfetch-${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz.sha256
+
+  create-release:
+    name: Create GitHub Release
+    needs: [release-linux]
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: List Artifacts
+        run: |
+          echo "=== Release Artifacts ==="
+          find release-artifacts -type f -ls
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-artifacts/linux-release/*
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+          generate_release_notes: true
+          body: |
+            ## ghostfetch ${{ github.ref_name }}
+
+            A fast, minimal system fetch tool for Linux written in Rust.
+
+            ### Downloads
+
+            | Platform | File | Checksum |
+            |----------|------|----------|
+            | **Linux (x86_64)** | `ghostfetch-${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz` | `.sha256` |
+
+            ### Quick Install
+
+            **Linux (curl)**
+            ```bash
+            curl -sSL https://raw.githubusercontent.com/ghostkellz/ghostfetch/main/install.sh | sudo bash
+            ```
+
+            **Linux (manual)**
+            ```bash
+            tar -xzf ghostfetch-${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz
+            sudo cp ghostfetch-${{ github.ref_name }}-x86_64-unknown-linux-gnu/ghostfetch /usr/local/bin/
+            ghostfetch
+            ```
+
+            **Arch Linux (AUR)**
+            ```bash
+            yay -S ghostfetch
+            # or
+            paru -S ghostfetch
+            ```
+
+            ### Verify Checksum
+
+            ```bash
+            sha256sum -c ghostfetch-${{ github.ref_name }}-x86_64-unknown-linux-gnu.tar.gz.sha256
+            ```
+
+            ### Features
+
+            - Distro-specific ASCII logos with colors
+            - Monitor detection with model names, refresh rate, HDR status
+            - Display server detection (Wayland/X11)
+            - Shell prompt detection (Starship, Powerlevel10k, Oh My Zsh)
+            - Terminal font detection
+            - Multiple GPU support
+            - RAM speed detection (with sudo)
+
+            ### Documentation
+
+            - [README](https://github.com/ghostkellz/ghostfetch#readme)
+            - [Changelog](https://github.com/ghostkellz/ghostfetch/blob/main/CHANGELOG.md)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Summary
+        run: |
+          echo "### Release ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Linux x86_64 | Published |" >> $GITHUB_STEP_SUMMARY

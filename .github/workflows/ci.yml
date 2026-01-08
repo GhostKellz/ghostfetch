@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO: /home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo
+  RUSTC: /home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc
+  RUSTFMT: /home/runner/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustfmt
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: self-hosted
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Environment
+        run: |
+          echo "=== Rust Toolchain ==="
+          $RUSTC --version
+          $CARGO --version
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ghostfetch-ci
+
+      - name: Check formatting
+        run: $CARGO fmt --check
+
+      - name: Run clippy
+        run: $CARGO clippy --release -- -D warnings
+
+      - name: Build release
+        run: $CARGO build --release
+
+      - name: Run tests
+        run: $CARGO test
+
+      - name: CLI Smoke Test
+        run: |
+          set -euo pipefail
+          GHOSTFETCH="./target/release/ghostfetch"
+
+          echo "=== Basic Commands ==="
+          $GHOSTFETCH --version
+          $GHOSTFETCH --help > /dev/null
+
+          echo ""
+          echo "=== Flag Tests ==="
+          $GHOSTFETCH --off > /dev/null
+          $GHOSTFETCH --no-color > /dev/null
+
+          echo ""
+          echo "=== Logo Override ==="
+          $GHOSTFETCH --logo arch --off > /dev/null
+          $GHOSTFETCH --logo fedora --off > /dev/null
+          $GHOSTFETCH --logo debian --off > /dev/null
+
+          echo ""
+          echo "CLI smoke tests passed"
+
+      - name: Build Summary
+        run: |
+          echo "### Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Binary | $(ls -lh ./target/release/ghostfetch | awk '{print $5}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Rust | $($RUSTC --version | cut -d' ' -f2) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | Passed |" >> $GITHUB_STEP_SUMMARY

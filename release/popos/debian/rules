@@ -1,0 +1,29 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export CARGO_HOME = $(CURDIR)/debian/cargo
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	cargo build --release
+
+override_dh_auto_install:
+	# Install binary
+	install -Dm755 target/release/ghostfetch debian/ghostfetch/usr/bin/ghostfetch
+	# Install desktop file
+	install -Dm644 ghostfetch.desktop debian/ghostfetch/usr/share/applications/ghostfetch.desktop
+	# Install icons
+	for size in 16 22 24 32 48 64 128 256 512; do \
+		install -Dm644 assets/icons/hicolor/$${size}x$${size}/apps/ghostfetch.png \
+			debian/ghostfetch/usr/share/icons/hicolor/$${size}x$${size}/apps/ghostfetch.png; \
+	done
+
+override_dh_auto_test:
+	# Skip tests during package build
+	true
+
+override_dh_auto_clean:
+	cargo clean || true
+	rm -rf $(CARGO_HOME)
