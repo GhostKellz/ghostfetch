@@ -112,25 +112,24 @@ pub fn get_packages() -> String {
     }
 
     // dpkg (debian/ubuntu)
-    if counts.is_empty() {
-        if let Ok(output) = Command::new("dpkg-query")
+    if counts.is_empty()
+        && let Ok(output) = Command::new("dpkg-query")
             .args(["-f", ".\n", "-W"])
             .output()
-        {
-            let count = String::from_utf8_lossy(&output.stdout).lines().count();
-            if count > 0 {
-                counts.push(format!("{} (dpkg)", count));
-            }
+    {
+        let count = String::from_utf8_lossy(&output.stdout).lines().count();
+        if count > 0 {
+            counts.push(format!("{} (dpkg)", count));
         }
     }
 
     // rpm (fedora/rhel)
-    if counts.is_empty() {
-        if let Ok(output) = Command::new("rpm").args(["-qa"]).output() {
-            let count = String::from_utf8_lossy(&output.stdout).lines().count();
-            if count > 0 {
-                counts.push(format!("{} (rpm)", count));
-            }
+    if counts.is_empty()
+        && let Ok(output) = Command::new("rpm").args(["-qa"]).output()
+    {
+        let count = String::from_utf8_lossy(&output.stdout).lines().count();
+        if count > 0 {
+            counts.push(format!("{} (rpm)", count));
         }
     }
 
@@ -147,15 +146,15 @@ pub fn get_de() -> String {
         .unwrap_or_else(|_| "Unknown".to_string());
 
     // Try to get version for KDE Plasma
-    if de.to_lowercase().contains("kde") || de.to_lowercase().contains("plasma") {
-        if let Ok(output) = Command::new("plasmashell").arg("--version").output() {
-            let version = String::from_utf8_lossy(&output.stdout);
-            for line in version.lines() {
-                if line.contains("plasmashell") {
-                    if let Some(ver) = line.split_whitespace().last() {
-                        return format!("KDE Plasma {}", ver);
-                    }
-                }
+    if (de.to_lowercase().contains("kde") || de.to_lowercase().contains("plasma"))
+        && let Ok(output) = Command::new("plasmashell").arg("--version").output()
+    {
+        let version = String::from_utf8_lossy(&output.stdout);
+        for line in version.lines() {
+            if line.contains("plasmashell")
+                && let Some(ver) = line.split_whitespace().last()
+            {
+                return format!("KDE Plasma {}", ver);
             }
         }
     }
@@ -347,21 +346,25 @@ fn get_ram_speed() -> Option<u32> {
             if line.starts_with("Configured Memory Speed:") {
                 if let Some(speed_str) = line.split(':').nth(1) {
                     let speed_str = speed_str.trim().replace(" MT/s", "").replace(" MHz", "");
-                    if let Ok(speed) = speed_str.parse::<u32>() {
-                        if speed > 0 && speed < 100000 {
-                            configured_speed = Some(speed);
-                        }
+                    if let Ok(speed) = speed_str.parse::<u32>()
+                        && speed > 0
+                        && speed < 100000
+                    {
+                        configured_speed = Some(speed);
                     }
                 }
             // Fallback to "Speed:" (JEDEC base speed)
-            } else if line.starts_with("Speed:") && line.contains("MT/s") && base_speed.is_none() {
-                if let Some(speed_str) = line.split(':').nth(1) {
-                    let speed_str = speed_str.trim().replace(" MT/s", "").replace(" MHz", "");
-                    if let Ok(speed) = speed_str.parse::<u32>() {
-                        if speed > 0 && speed < 100000 {
-                            base_speed = Some(speed);
-                        }
-                    }
+            } else if line.starts_with("Speed:")
+                && line.contains("MT/s")
+                && base_speed.is_none()
+                && let Some(speed_str) = line.split(':').nth(1)
+            {
+                let speed_str = speed_str.trim().replace(" MT/s", "").replace(" MHz", "");
+                if let Ok(speed) = speed_str.parse::<u32>()
+                    && speed > 0
+                    && speed < 100000
+                {
+                    base_speed = Some(speed);
                 }
             }
         }
@@ -380,10 +383,10 @@ fn get_ram_speed() -> Option<u32> {
         for entry in entries.flatten() {
             let path = entry.path();
             // Try to find memory controller info
-            if let Ok(content) = fs::read_to_string(path.join("dimm0/dimm_mem_type")) {
-                if content.contains("DDR") {
-                    // Found DDR info
-                }
+            if let Ok(content) = fs::read_to_string(path.join("dimm0/dimm_mem_type"))
+                && content.contains("DDR")
+            {
+                // Found DDR info
             }
         }
     }
@@ -522,7 +525,6 @@ pub struct MonitorInfo {
     pub name: String,
     pub resolution: String,
     pub refresh_rate: String,
-    pub size: Option<String>,
     pub hdr: bool,
 }
 
@@ -544,17 +546,15 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
 
             if dir_name.starts_with("card") && dir_name.contains('-') {
                 let edid_path = path.join("edid");
-                if edid_path.exists() {
-                    if let Ok(edid_bytes) = fs::read(&edid_path) {
-                        if edid_bytes.len() >= 128 {
-                            // Extract monitor name from EDID (descriptor blocks start at byte 54)
-                            if let Some(name) = extract_edid_name(&edid_bytes) {
-                                // Map card1-DP-2 -> DP-2
-                                let connector =
-                                    dir_name.split('-').skip(1).collect::<Vec<_>>().join("-");
-                                edid_names.insert(connector, name);
-                            }
-                        }
+                if edid_path.exists()
+                    && let Ok(edid_bytes) = fs::read(&edid_path)
+                    && edid_bytes.len() >= 128
+                {
+                    // Extract monitor name from EDID (descriptor blocks start at byte 54)
+                    if let Some(name) = extract_edid_name(&edid_bytes) {
+                        // Map card1-DP-2 -> DP-2
+                        let connector = dir_name.split('-').skip(1).collect::<Vec<_>>().join("-");
+                        edid_names.insert(connector, name);
                     }
                 }
             }
@@ -585,7 +585,6 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
                         name,
                         resolution: current_res.clone(),
                         refresh_rate: current_rate.clone(),
-                        size: None,
                         hdr: has_hdr,
                     });
                 }
@@ -632,45 +631,44 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
                 name,
                 resolution: current_res,
                 refresh_rate: current_rate,
-                size: None,
                 hdr: has_hdr,
             });
         }
     }
 
     // Fallback to xrandr if kscreen-doctor didn't work
-    if monitors.is_empty() && std::env::var("DISPLAY").is_ok() {
-        if let Ok(output) = Command::new("xrandr").args(["--query"]).output() {
-            let xrandr = String::from_utf8_lossy(&output.stdout);
-            let mut current_output = String::new();
+    if monitors.is_empty()
+        && std::env::var("DISPLAY").is_ok()
+        && let Ok(output) = Command::new("xrandr").args(["--query"]).output()
+    {
+        let xrandr = String::from_utf8_lossy(&output.stdout);
+        let mut current_output = String::new();
 
-            for line in xrandr.lines() {
-                if line.contains(" connected") {
-                    let parts: Vec<&str> = line.split_whitespace().collect();
-                    if !parts.is_empty() {
-                        current_output = parts[0].to_string();
-                    }
-                } else if line.contains('*') && !current_output.is_empty() {
-                    // Current resolution line
-                    let parts: Vec<&str> = line.split_whitespace().collect();
-                    if parts.len() >= 2 {
-                        let res = parts[0];
-                        let rate = parts[1].trim_end_matches('*').trim_end_matches('+');
+        for line in xrandr.lines() {
+            if line.contains(" connected") {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if !parts.is_empty() {
+                    current_output = parts[0].to_string();
+                }
+            } else if line.contains('*') && !current_output.is_empty() {
+                // Current resolution line
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() >= 2 {
+                    let res = parts[0];
+                    let rate = parts[1].trim_end_matches('*').trim_end_matches('+');
 
-                        let name = edid_names
-                            .get(&current_output)
-                            .cloned()
-                            .unwrap_or(current_output.clone());
+                    let name = edid_names
+                        .get(&current_output)
+                        .cloned()
+                        .unwrap_or(current_output.clone());
 
-                        monitors.push(MonitorInfo {
-                            name,
-                            resolution: res.to_string(),
-                            refresh_rate: format!("{} Hz", rate),
-                            size: None,
-                            hdr: false,
-                        });
-                        current_output.clear();
-                    }
+                    monitors.push(MonitorInfo {
+                        name,
+                        resolution: res.to_string(),
+                        refresh_rate: format!("{} Hz", rate),
+                        hdr: false,
+                    });
+                    current_output.clear();
                 }
             }
         }
@@ -717,7 +715,7 @@ fn extract_edid_name(edid: &[u8]) -> Option<String> {
             let name: String = name_bytes
                 .iter()
                 .take_while(|&&b| b != 0x0A && b != 0x00)
-                .filter(|&&b| b >= 0x20 && b < 0x7F)
+                .filter(|&&b| (0x20..0x7F).contains(&b))
                 .map(|&b| b as char)
                 .collect();
             let name = name.trim().to_string();
@@ -774,22 +772,6 @@ pub fn get_disks() -> Vec<String> {
     disk_info
 }
 
-pub fn get_init_system() -> String {
-    if fs::metadata("/run/systemd/system").is_ok() {
-        "systemd".to_string()
-    } else if fs::metadata("/run/openrc").is_ok() {
-        "OpenRC".to_string()
-    } else if fs::metadata("/run/runit").is_ok() {
-        "runit".to_string()
-    } else if fs::metadata("/run/s6").is_ok() {
-        "s6".to_string()
-    } else if fs::metadata("/sbin/dinit").is_ok() {
-        "dinit".to_string()
-    } else {
-        "Unknown".to_string()
-    }
-}
-
 pub fn get_network_info() -> Vec<(String, String)> {
     let mut networks = Vec::new();
 
@@ -802,10 +784,11 @@ pub fn get_network_info() -> Vec<(String, String)> {
 
         for line in ip_output.lines() {
             // Interface line: "2: enp6s0: <BROADCAST..."
-            if !line.starts_with(' ') && line.contains(':') {
-                if let Some(iface) = line.split(':').nth(1) {
-                    current_iface = iface.trim().to_string();
-                }
+            if !line.starts_with(' ')
+                && line.contains(':')
+                && let Some(iface) = line.split(':').nth(1)
+            {
+                current_iface = iface.trim().to_string();
             }
             // IP line: "    inet 10.0.0.21/24 ..."
             if line.trim().starts_with("inet ") {
@@ -858,7 +841,7 @@ pub fn get_local_ip() -> String {
     for (iface, ip) in &networks {
         if !iface.starts_with("veth") && !iface.starts_with("docker") && !iface.starts_with("virbr")
         {
-            return format!("{}", ip);
+            return ip.to_string();
         }
     }
 
@@ -880,10 +863,10 @@ pub fn get_terminal_font() -> Option<String> {
         if let Ok(content) = fs::read_to_string(&ghostty_config) {
             for line in content.lines() {
                 let line = line.trim();
-                if line.starts_with("font-family") {
-                    if let Some(font) = line.split('=').nth(1) {
-                        return Some(font.trim().trim_matches('"').to_string());
-                    }
+                if line.starts_with("font-family")
+                    && let Some(font) = line.split('=').nth(1)
+                {
+                    return Some(font.trim().trim_matches('"').to_string());
                 }
             }
         }
@@ -895,10 +878,10 @@ pub fn get_terminal_font() -> Option<String> {
         if let Ok(content) = fs::read_to_string(&kitty_config) {
             for line in content.lines() {
                 let line = line.trim();
-                if line.starts_with("font_family") {
-                    if let Some(font) = line.split_whitespace().skip(1).next() {
-                        return Some(font.to_string());
-                    }
+                if line.starts_with("font_family")
+                    && let Some(font) = line.split_whitespace().nth(1)
+                {
+                    return Some(font.to_string());
                 }
             }
         }
@@ -912,12 +895,13 @@ pub fn get_terminal_font() -> Option<String> {
         ] {
             if let Ok(content) = fs::read_to_string(config_path) {
                 for line in content.lines() {
-                    if line.contains("family") && !line.trim().starts_with('#') {
-                        if let Some(font) = line.split(['=', ':']).nth(1) {
-                            let font = font.trim().trim_matches('"').trim_matches('\'');
-                            if !font.is_empty() {
-                                return Some(font.to_string());
-                            }
+                    if line.contains("family")
+                        && !line.trim().starts_with('#')
+                        && let Some(font) = line.split(['=', ':']).nth(1)
+                    {
+                        let font = font.trim().trim_matches('"').trim_matches('\'');
+                        if !font.is_empty() {
+                            return Some(font.to_string());
                         }
                     }
                 }
@@ -931,16 +915,16 @@ pub fn get_terminal_font() -> Option<String> {
         if let Ok(entries) = fs::read_dir(&konsole_dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
-                if path.extension().map(|e| e == "profile").unwrap_or(false) {
-                    if let Ok(content) = fs::read_to_string(&path) {
-                        for line in content.lines() {
-                            if line.starts_with("Font=") {
-                                if let Some(font) = line.strip_prefix("Font=") {
-                                    // Format is usually "FontName,size,-1,..."
-                                    if let Some(name) = font.split(',').next() {
-                                        return Some(name.to_string());
-                                    }
-                                }
+                if path.extension().map(|e| e == "profile").unwrap_or(false)
+                    && let Ok(content) = fs::read_to_string(&path)
+                {
+                    for line in content.lines() {
+                        if line.starts_with("Font=")
+                            && let Some(font) = line.strip_prefix("Font=")
+                        {
+                            // Format is usually "FontName,size,-1,..."
+                            if let Some(name) = font.split(',').next() {
+                                return Some(name.to_string());
                             }
                         }
                     }
@@ -1092,46 +1076,44 @@ pub fn get_shell_theme() -> Option<String> {
     }
 
     // Check zshrc for theme indicators
-    if shell.contains("zsh") {
-        if let Ok(zshrc) = fs::read_to_string(format!("{}/.zshrc", home)) {
-            // Check for Oh My Zsh
-            if zshrc.contains("oh-my-zsh") || zshrc.contains("ohmyzsh") {
-                // Try to find the theme
-                for line in zshrc.lines() {
-                    let line = line.trim();
-                    if line.starts_with("ZSH_THEME=") {
-                        let theme = line
-                            .strip_prefix("ZSH_THEME=")
-                            .unwrap_or("")
-                            .trim_matches('"')
-                            .trim_matches('\'');
-                        if theme == "powerlevel10k/powerlevel10k" {
-                            return Some("Powerlevel10k (OMZ)".to_string());
-                        }
-                        return Some(format!("Oh My Zsh ({})", theme));
+    if shell.contains("zsh")
+        && let Ok(zshrc) = fs::read_to_string(format!("{}/.zshrc", home))
+    {
+        // Check for Oh My Zsh
+        if zshrc.contains("oh-my-zsh") || zshrc.contains("ohmyzsh") {
+            // Try to find the theme
+            for line in zshrc.lines() {
+                let line = line.trim();
+                if line.starts_with("ZSH_THEME=") {
+                    let theme = line
+                        .strip_prefix("ZSH_THEME=")
+                        .unwrap_or("")
+                        .trim_matches('"')
+                        .trim_matches('\'');
+                    if theme == "powerlevel10k/powerlevel10k" {
+                        return Some("Powerlevel10k (OMZ)".to_string());
                     }
+                    return Some(format!("Oh My Zsh ({})", theme));
                 }
-                return Some("Oh My Zsh".to_string());
             }
+            return Some("Oh My Zsh".to_string());
+        }
 
-            // Check for other frameworks
-            if zshrc.contains("zinit") {
-                return Some("Zinit".to_string());
-            }
-            if zshrc.contains("antigen") {
-                return Some("Antigen".to_string());
-            }
-            if zshrc.contains("zplug") {
-                return Some("Zplug".to_string());
-            }
+        // Check for other frameworks
+        if zshrc.contains("zinit") {
+            return Some("Zinit".to_string());
+        }
+        if zshrc.contains("antigen") {
+            return Some("Antigen".to_string());
+        }
+        if zshrc.contains("zplug") {
+            return Some("Zplug".to_string());
         }
     }
 
     // Check for bash-it
-    if shell.contains("bash") {
-        if fs::metadata(format!("{}/.bash_it", home)).is_ok() {
-            return Some("Bash-it".to_string());
-        }
+    if shell.contains("bash") && fs::metadata(format!("{}/.bash_it", home)).is_ok() {
+        return Some("Bash-it".to_string());
     }
 
     // Check for Fish
@@ -1139,10 +1121,10 @@ pub fn get_shell_theme() -> Option<String> {
         if fs::metadata(format!("{}/.config/fish/functions/fish_prompt.fish", home)).is_ok() {
             return Some("Fish (custom)".to_string());
         }
-        if let Ok(home) = std::env::var("HOME") {
-            if fs::metadata(format!("{}/.local/share/omf", home)).is_ok() {
-                return Some("Oh My Fish".to_string());
-            }
+        if let Ok(home) = std::env::var("HOME")
+            && fs::metadata(format!("{}/.local/share/omf", home)).is_ok()
+        {
+            return Some("Oh My Fish".to_string());
         }
     }
 

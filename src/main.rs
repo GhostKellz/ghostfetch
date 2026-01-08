@@ -172,8 +172,7 @@ fn main() {
             Some(logos::DistroLogo {
                 art: Box::leak(content.into_boxed_str()),
                 width: 40,
-                primary_color: |s| s.cyan().into(),
-                secondary_color: |s| s.blue().into(),
+                primary_color: |s| s.cyan(),
             })
         } else {
             eprintln!("Warning: Could not read ASCII file: {}", ascii_path);
@@ -201,10 +200,7 @@ fn main() {
         "@".white(),
         primary_color(&hostname).bold()
     ));
-    info_lines.push(format!(
-        "{}",
-        "-".repeat(username.len() + 1 + hostname.len())
-    ));
+    info_lines.push("-".repeat(username.len() + 1 + hostname.len()).to_string());
 
     // Host (motherboard/laptop model)
     if let Some(host) = info::get_host() {

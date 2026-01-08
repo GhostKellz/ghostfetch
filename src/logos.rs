@@ -4,7 +4,6 @@ pub struct DistroLogo {
     pub art: &'static str,
     pub width: usize,
     pub primary_color: fn(&str) -> ColoredString,
-    pub secondary_color: fn(&str) -> ColoredString,
 }
 
 fn cyan(s: &str) -> ColoredString {
@@ -22,9 +21,6 @@ fn red(s: &str) -> ColoredString {
 fn green(s: &str) -> ColoredString {
     s.green()
 }
-fn yellow(s: &str) -> ColoredString {
-    s.yellow()
-}
 fn magenta(s: &str) -> ColoredString {
     s.magenta()
 }
@@ -40,9 +36,7 @@ pub fn get_logo(distro_id: &str) -> DistroLogo {
         cachyos_logo()
     } else if id.contains("endeavour") {
         endeavouros_logo()
-    } else if id.contains("artix") {
-        arch_logo() // Uses Arch logo with same colors
-    } else if id.contains("arch") {
+    } else if id.contains("artix") || id.contains("arch") {
         arch_logo()
     // Fedora-based distros
     } else if id.contains("bazzite") {
@@ -104,7 +98,6 @@ fn arch_logo() -> DistroLogo {
 "#,
         width: 40,
         primary_color: cyan,
-        secondary_color: blue,
     }
 }
 
@@ -134,7 +127,6 @@ ossyNMMMNyMMhsssssssssssssshmmmhssssssso
 "#,
         width: 42,
         primary_color: red,
-        secondary_color: white,
     }
 }
 
@@ -161,7 +153,6 @@ fn debian_logo() -> DistroLogo {
 "#,
         width: 35,
         primary_color: red,
-        secondary_color: white,
     }
 }
 
@@ -190,7 +181,6 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 "#,
         width: 42,
         primary_color: bright_blue,
-        secondary_color: white,
     }
 }
 
@@ -220,7 +210,6 @@ fn popos_logo() -> DistroLogo {
 "#,
         width: 42,
         primary_color: cyan,
-        secondary_color: white,
     }
 }
 
@@ -244,7 +233,6 @@ fn manjaro_logo() -> DistroLogo {
 "#,
         width: 36,
         primary_color: green,
-        secondary_color: green,
     }
 }
 
@@ -273,7 +261,6 @@ fn mint_logo() -> DistroLogo {
 "#,
         width: 43,
         primary_color: green,
-        secondary_color: white,
     }
 }
 
@@ -301,7 +288,6 @@ dKKKKKKKKKKKK;.;oOKx,..^..;kKKK0.  dKd
 "#,
         width: 40,
         primary_color: green,
-        secondary_color: white,
     }
 }
 
@@ -329,7 +315,6 @@ yMMNNNNNNNmmmmmNNMmhs+/-`
 "#,
         width: 38,
         primary_color: magenta,
-        secondary_color: white,
     }
 }
 
@@ -356,7 +341,6 @@ fn nixos_logo() -> DistroLogo {
 "#,
         width: 50,
         primary_color: blue,
-        secondary_color: cyan,
     }
 }
 
@@ -384,7 +368,6 @@ fn void_logo() -> DistroLogo {
 "#,
         width: 52,
         primary_color: green,
-        secondary_color: white,
     }
 }
 
@@ -414,7 +397,6 @@ hdddyo+ohddyosdddddddddho+oydddy++ohdddh
 "#,
         width: 42,
         primary_color: blue,
-        secondary_color: white,
     }
 }
 
@@ -444,7 +426,6 @@ fn proxmox_logo() -> DistroLogo {
 "#,
         width: 46,
         primary_color: white,
-        secondary_color: yellow,
     }
 }
 
@@ -466,7 +447,6 @@ fn linux_logo() -> DistroLogo {
 "#,
         width: 26,
         primary_color: white,
-        secondary_color: yellow,
     }
 }
 
@@ -495,7 +475,6 @@ fn cachyos_logo() -> DistroLogo {
 "#,
         width: 40,
         primary_color: green,
-        secondary_color: cyan,
     }
 }
 
@@ -520,7 +499,6 @@ fn endeavouros_logo() -> DistroLogo {
 "#,
         width: 46,
         primary_color: magenta,
-        secondary_color: red,
     }
 }
 
@@ -549,7 +527,6 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 "#,
         width: 42,
         primary_color: magenta,
-        secondary_color: white,
     }
 }
 
@@ -578,6 +555,5 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 "#,
         width: 42,
         primary_color: red,
-        secondary_color: white,
     }
 }
