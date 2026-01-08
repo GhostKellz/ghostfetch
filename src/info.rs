@@ -45,7 +45,12 @@ pub fn get_shell() -> String {
         if let Some(first_line) = version_str.lines().next() {
             // Extract version number
             for part in first_line.split_whitespace() {
-                if part.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
+                if part
+                    .chars()
+                    .next()
+                    .map(|c| c.is_ascii_digit())
+                    .unwrap_or(false)
+                {
                     return format!("{} {}", shell, part);
                 }
             }
@@ -108,7 +113,10 @@ pub fn get_packages() -> String {
 
     // dpkg (debian/ubuntu)
     if counts.is_empty() {
-        if let Ok(output) = Command::new("dpkg-query").args(["-f", ".\n", "-W"]).output() {
+        if let Ok(output) = Command::new("dpkg-query")
+            .args(["-f", ".\n", "-W"])
+            .output()
+        {
             let count = String::from_utf8_lossy(&output.stdout).lines().count();
             if count > 0 {
                 counts.push(format!("{} (dpkg)", count));
@@ -183,8 +191,18 @@ pub fn get_wm() -> String {
             _ => {
                 // Check for standalone WMs via process
                 let wms = [
-                    "hyprland", "sway", "i3", "bspwm", "dwm", "awesome", "openbox",
-                    "fluxbox", "herbstluftwm", "qtile", "xmonad", "spectrwm",
+                    "hyprland",
+                    "sway",
+                    "i3",
+                    "bspwm",
+                    "dwm",
+                    "awesome",
+                    "openbox",
+                    "fluxbox",
+                    "herbstluftwm",
+                    "qtile",
+                    "xmonad",
+                    "spectrwm",
                 ];
                 if let Ok(output) = Command::new("ps").args(["-e", "-o", "comm="]).output() {
                     let procs = String::from_utf8_lossy(&output.stdout).to_lowercase();
@@ -256,7 +274,9 @@ pub fn get_terminal() -> String {
         if let Ok(stat) = fs::read_to_string(format!("/proc/{}/stat", ppid)) {
             let parts: Vec<&str> = stat.split_whitespace().collect();
             if parts.len() > 3 {
-                let comm = parts[1].trim_matches(|c| c == '(' || c == ')').to_lowercase();
+                let comm = parts[1]
+                    .trim_matches(|c| c == '(' || c == ')')
+                    .to_lowercase();
                 for (proc_name, display_name) in &terminals {
                     if comm == *proc_name || comm.contains(proc_name) {
                         // Try to get version
@@ -266,9 +286,18 @@ pub fn get_terminal() -> String {
                                 // Extract version from line
                                 let line_parts: Vec<&str> = line.split_whitespace().collect();
                                 for part in line_parts {
-                                    if part.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false)
-                                       || part.starts_with('v') {
-                                        return format!("{} {}", display_name, part.trim_start_matches('v'));
+                                    if part
+                                        .chars()
+                                        .next()
+                                        .map(|c| c.is_ascii_digit())
+                                        .unwrap_or(false)
+                                        || part.starts_with('v')
+                                    {
+                                        return format!(
+                                            "{} {}",
+                                            display_name,
+                                            part.trim_start_matches('v')
+                                        );
                                     }
                                 }
                             }
@@ -296,7 +325,10 @@ pub fn get_memory(sys: &System) -> String {
 
     // Try to get RAM speed
     if let Some(speed) = get_ram_speed() {
-        format!("{:.2} GiB / {:.2} GiB ({}%) @ {} MT/s", used, total, percent, speed)
+        format!(
+            "{:.2} GiB / {:.2} GiB ({}%) @ {} MT/s",
+            used, total, percent, speed
+        )
     } else {
         format!("{:.2} GiB / {:.2} GiB ({}%)", used, total, percent)
     }
@@ -304,10 +336,7 @@ pub fn get_memory(sys: &System) -> String {
 
 fn get_ram_speed() -> Option<u32> {
     // Try dmidecode first (requires root, but might be cached)
-    if let Ok(output) = Command::new("dmidecode")
-        .args(["-t", "memory"])
-        .output()
-    {
+    if let Ok(output) = Command::new("dmidecode").args(["-t", "memory"]).output() {
         let dmi = String::from_utf8_lossy(&output.stdout);
         let mut configured_speed: Option<u32> = None;
         let mut base_speed: Option<u32> = None;
@@ -385,7 +414,11 @@ pub fn get_swap(sys: &System) -> Option<String> {
     }
     let used = sys.used_swap() as f64 / 1024.0 / 1024.0 / 1024.0;
     let total = total as f64 / 1024.0 / 1024.0 / 1024.0;
-    let percent = if total > 0.0 { (used / total * 100.0) as u64 } else { 0 };
+    let percent = if total > 0.0 {
+        (used / total * 100.0) as u64
+    } else {
+        0
+    };
     Some(format!("{:.2} GiB / {:.2} GiB ({}%)", used, total, percent))
 }
 
@@ -397,7 +430,9 @@ pub fn get_cpu(sys: &System) -> String {
             let cores = sys.cpus().len();
 
             // Try to get max boost frequency from cpufreq (more accurate with PBO)
-            let freq = if let Ok(max_freq) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq") {
+            let freq = if let Ok(max_freq) =
+                fs::read_to_string("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq")
+            {
                 // cpuinfo_max_freq is in kHz
                 max_freq.trim().parse::<f64>().unwrap_or(0.0) / 1_000_000.0
             } else {
@@ -434,7 +469,8 @@ pub fn get_gpu() -> Vec<String> {
 
                     // Determine if discrete or integrated
                     let is_integrated = device.to_lowercase().contains("radeon graphics")
-                        || device.to_lowercase().contains("intel") && device.to_lowercase().contains("graphics")
+                        || device.to_lowercase().contains("intel")
+                            && device.to_lowercase().contains("graphics")
                         || device.to_lowercase().contains("integrated")
                         || device.to_lowercase().contains("granite ridge");
 
@@ -454,7 +490,12 @@ pub fn get_gpu() -> Vec<String> {
 
                         if is_integrated {
                             // For iGPU: "AMD Radeon [Granite Ridge]"
-                            format!("{} {} [{}]", clean_vendor, product.replace(" Graphics", ""), chip)
+                            format!(
+                                "{} {} [{}]",
+                                clean_vendor,
+                                product.replace(" Graphics", ""),
+                                chip
+                            )
                         } else {
                             // For dGPU: "NVIDIA GeForce RTX 5090 [GB202]"
                             format!("{} {} [{}]", clean_vendor, product, chip)
@@ -489,12 +530,17 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
     let mut monitors = Vec::new();
 
     // First try to get monitor names from EDID
-    let mut edid_names: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+    let mut edid_names: std::collections::HashMap<String, String> =
+        std::collections::HashMap::new();
 
     if let Ok(entries) = fs::read_dir("/sys/class/drm") {
         for entry in entries.flatten() {
             let path = entry.path();
-            let dir_name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+            let dir_name = path
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string();
 
             if dir_name.starts_with("card") && dir_name.contains('-') {
                 let edid_path = path.join("edid");
@@ -504,7 +550,8 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
                             // Extract monitor name from EDID (descriptor blocks start at byte 54)
                             if let Some(name) = extract_edid_name(&edid_bytes) {
                                 // Map card1-DP-2 -> DP-2
-                                let connector = dir_name.split('-').skip(1).collect::<Vec<_>>().join("-");
+                                let connector =
+                                    dir_name.split('-').skip(1).collect::<Vec<_>>().join("-");
                                 edid_names.insert(connector, name);
                             }
                         }
@@ -530,7 +577,8 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
             if line.starts_with("Output:") {
                 // Save previous if exists
                 if !current_output.is_empty() && !current_res.is_empty() {
-                    let name = edid_names.get(&current_output)
+                    let name = edid_names
+                        .get(&current_output)
                         .cloned()
                         .unwrap_or(current_output.clone());
                     monitors.push(MonitorInfo {
@@ -576,7 +624,8 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
 
         // Don't forget the last one
         if !current_output.is_empty() && !current_res.is_empty() {
-            let name = edid_names.get(&current_output)
+            let name = edid_names
+                .get(&current_output)
                 .cloned()
                 .unwrap_or(current_output.clone());
             monitors.push(MonitorInfo {
@@ -608,7 +657,8 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
                         let res = parts[0];
                         let rate = parts[1].trim_end_matches('*').trim_end_matches('+');
 
-                        let name = edid_names.get(&current_output)
+                        let name = edid_names
+                            .get(&current_output)
                             .cloned()
                             .unwrap_or(current_output.clone());
 
@@ -687,12 +737,20 @@ pub fn get_disks() -> Vec<String> {
         let mount = disk.mount_point().to_string_lossy();
 
         // Only show important mount points
-        if mount == "/" || mount.starts_with("/home") || mount.starts_with("/data")
-           || mount.starts_with("/mnt") || mount.starts_with("/media") {
+        if mount == "/"
+            || mount.starts_with("/home")
+            || mount.starts_with("/data")
+            || mount.starts_with("/mnt")
+            || mount.starts_with("/media")
+        {
             let total = disk.total_space() as f64 / 1024.0 / 1024.0 / 1024.0;
             let available = disk.available_space() as f64 / 1024.0 / 1024.0 / 1024.0;
             let used = total - available;
-            let percent = if total > 0.0 { (used / total * 100.0) as u64 } else { 0 };
+            let percent = if total > 0.0 {
+                (used / total * 100.0) as u64
+            } else {
+                0
+            };
 
             let fs = disk.file_system().to_string_lossy();
 
@@ -777,8 +835,13 @@ pub fn get_local_ip() -> String {
     // If we have a bridge, show it prominently
     if let Some((iface, ip)) = bridge {
         // Also find primary non-bridge interface
-        let primary = networks.iter()
-            .find(|(i, _)| !i.starts_with("br") && !i.starts_with("bond") && !i.starts_with("veth") && !i.starts_with("docker") && !i.starts_with("virbr"));
+        let primary = networks.iter().find(|(i, _)| {
+            !i.starts_with("br")
+                && !i.starts_with("bond")
+                && !i.starts_with("veth")
+                && !i.starts_with("docker")
+                && !i.starts_with("virbr")
+        });
 
         if let Some((p_iface, p_ip)) = primary {
             return format!("{} ({}), {} ({})", ip, iface, p_ip, p_iface);
@@ -793,13 +856,17 @@ pub fn get_local_ip() -> String {
 
     // Regular interface - skip virtual ones
     for (iface, ip) in &networks {
-        if !iface.starts_with("veth") && !iface.starts_with("docker") && !iface.starts_with("virbr") {
+        if !iface.starts_with("veth") && !iface.starts_with("docker") && !iface.starts_with("virbr")
+        {
             return format!("{}", ip);
         }
     }
 
     // Fallback to first
-    networks.first().map(|(_, ip)| ip.clone()).unwrap_or_else(|| "Unknown".to_string())
+    networks
+        .first()
+        .map(|(_, ip)| ip.clone())
+        .unwrap_or_else(|| "Unknown".to_string())
 }
 
 pub fn get_locale() -> String {
@@ -920,13 +987,19 @@ pub fn get_editor() -> Option<String> {
         if display_name == "Neovim" {
             // NVIM v0.10.0
             if let Some(ver) = first_line.strip_prefix("NVIM v") {
-                return Some(format!("Neovim {}", ver.split_whitespace().next().unwrap_or(ver)));
+                return Some(format!(
+                    "Neovim {}",
+                    ver.split_whitespace().next().unwrap_or(ver)
+                ));
             }
         } else if display_name == "Vim" {
             // VIM - Vi IMproved 9.0
             if let Some(pos) = first_line.find("Vi IMproved ") {
                 let ver = &first_line[pos + 12..];
-                return Some(format!("Vim {}", ver.split_whitespace().next().unwrap_or(ver)));
+                return Some(format!(
+                    "Vim {}",
+                    ver.split_whitespace().next().unwrap_or(ver)
+                ));
             }
         } else if display_name == "Helix" {
             // helix 24.07
@@ -937,13 +1010,19 @@ pub fn get_editor() -> Option<String> {
             // GNU nano, version 7.2
             if let Some(pos) = first_line.find("version ") {
                 let ver = &first_line[pos + 8..];
-                return Some(format!("Nano {}", ver.split_whitespace().next().unwrap_or(ver)));
+                return Some(format!(
+                    "Nano {}",
+                    ver.split_whitespace().next().unwrap_or(ver)
+                ));
             }
         } else if display_name == "Emacs" {
             // GNU Emacs 29.1
             if let Some(pos) = first_line.find("Emacs ") {
                 let ver = &first_line[pos + 6..];
-                return Some(format!("Emacs {}", ver.split_whitespace().next().unwrap_or(ver)));
+                return Some(format!(
+                    "Emacs {}",
+                    ver.split_whitespace().next().unwrap_or(ver)
+                ));
             }
         }
     }
@@ -960,17 +1039,27 @@ pub fn get_shell_theme() -> Option<String> {
     let bashrc = fs::read_to_string(format!("{}/.bashrc", home)).ok();
 
     // Check what's actually initialized (order matters - last one wins)
-    let has_starship_init = zshrc.as_ref().map(|rc| rc.contains("starship init")).unwrap_or(false)
-        || bashrc.as_ref().map(|rc| rc.contains("starship init")).unwrap_or(false);
+    let has_starship_init = zshrc
+        .as_ref()
+        .map(|rc| rc.contains("starship init"))
+        .unwrap_or(false)
+        || bashrc
+            .as_ref()
+            .map(|rc| rc.contains("starship init"))
+            .unwrap_or(false);
 
     let has_p10k = fs::metadata(format!("{}/.p10k.zsh", home)).is_ok();
-    let has_p10k_source = zshrc.as_ref().map(|rc| rc.contains("source ~/.p10k.zsh") || rc.contains("source $HOME/.p10k.zsh")).unwrap_or(false);
+    let has_p10k_source = zshrc
+        .as_ref()
+        .map(|rc| rc.contains("source ~/.p10k.zsh") || rc.contains("source $HOME/.p10k.zsh"))
+        .unwrap_or(false);
 
     // If both are present, show both with indicator of which is active
     if has_starship_init && has_p10k {
         if let Some(ref rc) = zshrc {
             let starship_pos = rc.find("starship init");
-            let p10k_pos = rc.find("source ~/.p10k.zsh")
+            let p10k_pos = rc
+                .find("source ~/.p10k.zsh")
                 .or_else(|| rc.find("source $HOME/.p10k.zsh"));
 
             match (starship_pos, p10k_pos) {
@@ -1097,11 +1186,17 @@ pub fn get_host() -> Option<String> {
     // Try to get product name (laptop/desktop model)
     if let Ok(product) = fs::read_to_string("/sys/devices/virtual/dmi/id/product_name") {
         let product = product.trim();
-        if !product.is_empty() && product != "System Product Name" && product != "To Be Filled By O.E.M." {
+        if !product.is_empty()
+            && product != "System Product Name"
+            && product != "To Be Filled By O.E.M."
+        {
             // Also try to get version for some systems
             if let Ok(version) = fs::read_to_string("/sys/devices/virtual/dmi/id/product_version") {
                 let version = version.trim();
-                if !version.is_empty() && version != "System Version" && version != "To Be Filled By O.E.M." {
+                if !version.is_empty()
+                    && version != "System Version"
+                    && version != "To Be Filled By O.E.M."
+                {
                     return Some(format!("{} {}", product, version));
                 }
             }

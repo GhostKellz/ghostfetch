@@ -7,14 +7,30 @@ pub struct DistroLogo {
     pub secondary_color: fn(&str) -> ColoredString,
 }
 
-fn cyan(s: &str) -> ColoredString { s.cyan() }
-fn blue(s: &str) -> ColoredString { s.blue() }
-fn white(s: &str) -> ColoredString { s.white() }
-fn red(s: &str) -> ColoredString { s.red() }
-fn green(s: &str) -> ColoredString { s.green() }
-fn yellow(s: &str) -> ColoredString { s.yellow() }
-fn magenta(s: &str) -> ColoredString { s.magenta() }
-fn bright_blue(s: &str) -> ColoredString { s.bright_blue() }
+fn cyan(s: &str) -> ColoredString {
+    s.cyan()
+}
+fn blue(s: &str) -> ColoredString {
+    s.blue()
+}
+fn white(s: &str) -> ColoredString {
+    s.white()
+}
+fn red(s: &str) -> ColoredString {
+    s.red()
+}
+fn green(s: &str) -> ColoredString {
+    s.green()
+}
+fn yellow(s: &str) -> ColoredString {
+    s.yellow()
+}
+fn magenta(s: &str) -> ColoredString {
+    s.magenta()
+}
+fn bright_blue(s: &str) -> ColoredString {
+    s.bright_blue()
+}
 
 pub fn get_logo(distro_id: &str) -> DistroLogo {
     let id = distro_id.to_lowercase();

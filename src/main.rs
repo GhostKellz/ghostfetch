@@ -3,8 +3,8 @@ mod logos;
 
 use clap::Parser;
 use colored::Colorize;
-use sysinfo::System;
 use std::io::{self, IsTerminal};
+use sysinfo::System;
 
 fn get_terminal_width() -> usize {
     // Try to get terminal size
@@ -208,19 +208,11 @@ fn main() {
 
     // Host (motherboard/laptop model)
     if let Some(host) = info::get_host() {
-        info_lines.push(format!(
-            "{:<12} {}",
-            primary_color("Host").bold(),
-            host
-        ));
+        info_lines.push(format!("{:<12} {}", primary_color("Host").bold(), host));
     }
 
     // System info
-    info_lines.push(format!(
-        "{:<12} {}",
-        primary_color("OS").bold(),
-        os_name
-    ));
+    info_lines.push(format!("{:<12} {}", primary_color("OS").bold(), os_name));
     info_lines.push(format!(
         "{:<12} {}",
         primary_color("Kernel").bold(),
@@ -244,11 +236,7 @@ fn main() {
 
     // Shell theme (p10k, starship, omz, etc.)
     if let Some(theme) = info::get_shell_theme() {
-        info_lines.push(format!(
-            "{:<12} {}",
-            primary_color("Prompt").bold(),
-            theme
-        ));
+        info_lines.push(format!("{:<12} {}", primary_color("Prompt").bold(), theme));
     }
 
     // Display/Monitor info
@@ -296,11 +284,7 @@ fn main() {
 
     // Terminal Font
     if let Some(font) = info::get_terminal_font() {
-        info_lines.push(format!(
-            "{:<12} {}",
-            primary_color("Font").bold(),
-            font
-        ));
+        info_lines.push(format!("{:<12} {}", primary_color("Font").bold(), font));
     }
 
     // Multiplexer (tmux, zellij, screen)
@@ -314,11 +298,7 @@ fn main() {
 
     // Editor
     if let Some(editor) = info::get_editor() {
-        info_lines.push(format!(
-            "{:<12} {}",
-            primary_color("Editor").bold(),
-            editor
-        ));
+        info_lines.push(format!("{:<12} {}", primary_color("Editor").bold(), editor));
     }
 
     // Hardware
@@ -336,11 +316,7 @@ fn main() {
         } else {
             "GPU".to_string()
         };
-        info_lines.push(format!(
-            "{:<12} {}",
-            primary_color(&label).bold(),
-            gpu
-        ));
+        info_lines.push(format!("{:<12} {}", primary_color(&label).bold(), gpu));
     }
 
     // Memory
@@ -352,21 +328,13 @@ fn main() {
 
     // Swap (if exists)
     if let Some(swap) = info::get_swap(&sys) {
-        info_lines.push(format!(
-            "{:<12} {}",
-            primary_color("Swap").bold(),
-            swap
-        ));
+        info_lines.push(format!("{:<12} {}", primary_color("Swap").bold(), swap));
     }
 
     // Disks
     let disks = info::get_disks();
     for disk in &disks {
-        info_lines.push(format!(
-            "{:<12} {}",
-            primary_color("Disk").bold(),
-            disk
-        ));
+        info_lines.push(format!("{:<12} {}", primary_color("Disk").bold(), disk));
     }
 
     // Network info
@@ -409,7 +377,11 @@ fn main() {
             // Truncate info line if too long
             let display_line = truncate_line(info_line, max_info_width);
 
-            print!("{:width$}", (logo.primary_color)(logo_line), width = logo.width);
+            print!(
+                "{:width$}",
+                (logo.primary_color)(logo_line),
+                width = logo.width
+            );
             println!("{}", display_line);
         }
 
