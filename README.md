@@ -1,14 +1,23 @@
-# ghostfetch
+<h1 align="center">ghostfetch</h1>
 
-[![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-b7410e?style=flat-square&logo=rust)](https://www.rust-lang.org/)
-[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-1793D1?style=flat-square&logo=arch-linux&logoColor=white)](https://archlinux.org/)
-[![Fedora](https://img.shields.io/badge/Fedora-51A2DA?style=flat-square&logo=fedora&logoColor=white)](https://fedoraproject.org/)
-[![Debian](https://img.shields.io/badge/Debian-A81D33?style=flat-square&logo=debian&logoColor=white)](https://www.debian.org/)
-[![Pop!_OS](https://img.shields.io/badge/Pop!__OS-48B9C7?style=flat-square&logo=pop!_os&logoColor=white)](https://pop.system76.com/)
-[![Wayland](https://img.shields.io/badge/Wayland-FFBC00?style=flat-square&logo=wayland&logoColor=black)](https://wayland.freedesktop.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+<p align="center">
+  <strong>A fast, minimal system information tool for Linux</strong>
+</p>
 
-A fast, minimal system information tool for Linux written in Rust.
+<p align="center">
+  <img src="https://img.shields.io/badge/Rust-B7410E?style=for-the-badge&logo=rust&logoColor=white" alt="Rust">
+  <img src="https://img.shields.io/badge/Clap-4B0082?style=for-the-badge&logo=terminal&logoColor=white" alt="Clap">
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux">
+  <img src="https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white" alt="Arch Linux">
+  <img src="https://img.shields.io/badge/Wayland-FFBC00?style=for-the-badge&logo=wayland&logoColor=black" alt="Wayland">
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License">
+</p>
+
+---
+
+A fast, minimal system information tool for **Linux** written in Rust.
+
+> **Note**: ghostfetch is Linux-only. It relies on Linux-specific interfaces (/proc, /sys, EDID via DRM) and will not work on macOS, Windows, or BSD.
 
 <p align="center">
   <img src="assets/logo/logo.png" alt="ghostfetch logo" width="400">
@@ -31,13 +40,13 @@ A fast, minimal system information tool for Linux written in Rust.
 
 ## Installation
 
-### From source (requires Rust 1.70+)
+### From source (requires Rust 1.90+)
 
 ```bash
-git clone https://github.com/yourusername/ghostfetch.git
+git clone https://github.com/ghostkellz/ghostfetch.git
 cd ghostfetch
 cargo build --release
-sudo cp target/release/ghostfetch /usr/local/bin/
+sudo cp target/x86_64-unknown-linux-gnu/release/ghostfetch /usr/local/bin/
 ```
 
 ### Arch Linux (AUR)
@@ -164,6 +173,12 @@ ghostfetch stands on the shoulders of giants. Special thanks to:
 - **[neofetch](https://github.com/dylanaraps/neofetch)** by Dylan Araps - The original system fetch tool that started it all. ASCII art and distro detection patterns referenced from this project. (No longer maintained)
 - **[fastfetch](https://github.com/fastfetch-cli/fastfetch)** - A blazingly fast system information tool written in C. Inspired our detailed hardware detection approach (monitor names, GPU classification, etc.)
 - **[betterfetch](https://codeberg.org/sctech/betterfetch)** - A simple, clean fetch script. Inspired our minimal approach and output formatting.
+
+## Documentation
+
+- [Architecture](docs/architecture.md) - Module structure and design decisions
+- [External Tools](docs/external-tools.md) - Optional tools for enhanced detection
+- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
 
 ## Contributing
 

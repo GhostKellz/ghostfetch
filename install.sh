@@ -8,7 +8,7 @@
 
 set -e
 
-VERSION="0.1.0"
+VERSION="0.1.1"
 REPO_URL="https://github.com/ghostkellz/ghostfetch"
 INSTALL_DIR="/usr/local/bin"
 ICON_DIR="/usr/share/icons/hicolor"
@@ -251,23 +251,75 @@ uninstall() {
     info "ghostfetch has been uninstalled"
 }
 
+download_binary() {
+    info "Downloading prebuilt binary..."
+
+    local latest_url="https://api.github.com/repos/ghostkellz/ghostfetch/releases/latest"
+    local release_info
+
+    if command -v curl &> /dev/null; then
+        release_info=$(curl -s "$latest_url")
+    elif command -v wget &> /dev/null; then
+        release_info=$(wget -qO- "$latest_url")
+    else
+        error "curl or wget required for binary download"
+    fi
+
+    # Extract download URL for Linux tarball
+    local download_url
+    download_url=$(echo "$release_info" | grep -oP '"browser_download_url":\s*"\K[^"]+linux[^"]+\.tar\.gz' | head -1)
+
+    if [[ -z "$download_url" ]]; then
+        warn "No prebuilt binary found. Falling back to source build..."
+        build_from_source
+        return
+    fi
+
+    info "Downloading from: $download_url"
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+
+    if command -v curl &> /dev/null; then
+        curl -sL "$download_url" -o "$tmp_dir/ghostfetch.tar.gz"
+    else
+        wget -qO "$tmp_dir/ghostfetch.tar.gz" "$download_url"
+    fi
+
+    tar -xzf "$tmp_dir/ghostfetch.tar.gz" -C "$tmp_dir"
+
+    # Find the binary
+    BINARY_PATH=$(find "$tmp_dir" -name "ghostfetch" -type f | head -1)
+
+    if [[ -z "$BINARY_PATH" ]]; then
+        rm -rf "$tmp_dir"
+        error "Binary not found in archive"
+    fi
+
+    chmod +x "$BINARY_PATH"
+    info "Binary download successful!"
+}
+
 show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
+    echo "  --binary, -b      Download prebuilt binary (faster)"
+    echo "  --source, -s      Build from source (default)"
     echo "  --help, -h        Show this help message"
     echo "  --uninstall, -u   Uninstall ghostfetch"
     echo "  --version, -v     Show version"
     echo ""
-    echo "This script will:"
-    echo "  1. Detect your Linux distribution"
-    echo "  2. Install required dependencies (Rust)"
-    echo "  3. Build ghostfetch from source"
-    echo "  4. Install the binary, icons, and desktop file"
+    echo "Examples:"
+    echo "  $0                # Build and install from source"
+    echo "  $0 --binary       # Download and install prebuilt binary"
+    echo "  $0 --uninstall    # Remove ghostfetch"
 }
 
 main() {
     print_banner
+
+    local install_method="source"
 
     case "${1:-}" in
         --help|-h)
@@ -282,12 +334,24 @@ main() {
             echo "ghostfetch installer v${VERSION}"
             exit 0
             ;;
+        --binary|-b)
+            install_method="binary"
+            ;;
+        --source|-s)
+            install_method="source"
+            ;;
     esac
 
     check_root
     detect_os
-    check_dependencies
-    build_from_source
+
+    if [[ "$install_method" == "binary" ]]; then
+        download_binary
+    else
+        check_dependencies
+        build_from_source
+    fi
+
     install_binary
     install_icons
     install_desktop_file

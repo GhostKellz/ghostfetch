@@ -1,7 +1,8 @@
 use colored::{ColoredString, Colorize};
+use std::borrow::Cow;
 
 pub struct DistroLogo {
-    pub art: &'static str,
+    pub art: Cow<'static, str>,
     pub width: usize,
     pub primary_color: fn(&str) -> ColoredString,
 }
@@ -75,7 +76,8 @@ pub fn get_logo(distro_id: &str) -> DistroLogo {
 
 fn arch_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
                    -`
                   .o+`
                  `ooo/
@@ -96,6 +98,7 @@ fn arch_logo() -> DistroLogo {
  `++:.                           `-/+/
  .`                                 `/
 "#,
+        ),
         width: 40,
         primary_color: cyan,
     }
@@ -103,7 +106,8 @@ fn arch_logo() -> DistroLogo {
 
 fn ubuntu_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
             .-/+oossssoo+/-.
         `:+ssssssssssssssssss+:`
       -+ssssssssssssssssssyyssss+-
@@ -125,6 +129,7 @@ ossyNMMMNyMMhsssssssssssssshmmmhssssssso
         `:+ssssssssssssssssss+:`
             .-/+oossssoo+/-.
 "#,
+        ),
         width: 42,
         primary_color: red,
     }
@@ -132,7 +137,8 @@ ossyNMMMNyMMhsssssssssssssshmmmhssssssso
 
 fn debian_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
        _,met$$$$$gg.
     ,g$$$$$$$$$$$$$$$P.
   ,g$$P"        """Y$$.".
@@ -151,6 +157,7 @@ fn debian_logo() -> DistroLogo {
           `"Y$b._
               `"""
 "#,
+        ),
         width: 35,
         primary_color: red,
     }
@@ -158,7 +165,8 @@ fn debian_logo() -> DistroLogo {
 
 fn fedora_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
              .',;::::;,'.
          .';:cccccccccccc:;,.
       .;cccccccccccccccccccccc;.
@@ -179,6 +187,7 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 .:cccccccccccccccccccc:;,..
   '::cccccccccccccc::;,.
 "#,
+        ),
         width: 42,
         primary_color: bright_blue,
     }
@@ -186,7 +195,8 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 
 fn popos_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
              /////////////
          /////////////////////
       ///////*767////////////////
@@ -208,6 +218,7 @@ fn popos_logo() -> DistroLogo {
          /////////////////////
              /////////////
 "#,
+        ),
         width: 42,
         primary_color: cyan,
     }
@@ -215,7 +226,8 @@ fn popos_logo() -> DistroLogo {
 
 fn manjaro_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
  $$$$$$$$$$$$$$$$  $$$$$$$$
  $$$$$$$$$$$$$$$$  $$$$$$$$
  $$$$$$$$$$$$$$$$  $$$$$$$$
@@ -231,6 +243,7 @@ fn manjaro_logo() -> DistroLogo {
  $$$$$$$$  $$$$$$  $$$$$$$$
  $$$$$$$$  $$$$$$  $$$$$$$$
 "#,
+        ),
         width: 36,
         primary_color: green,
     }
@@ -238,7 +251,8 @@ fn manjaro_logo() -> DistroLogo {
 
 fn mint_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
              ...-:::::-...
           .-MMMMMMMMMMMMMMM-.
       .-MMMM`..-:::::::-..`MMMM-.
@@ -259,6 +273,7 @@ fn mint_logo() -> DistroLogo {
             '-MMMMMMMMMMMMM-'
                ``-:::::-``
 "#,
+        ),
         width: 43,
         primary_color: green,
     }
@@ -266,7 +281,8 @@ fn mint_logo() -> DistroLogo {
 
 fn opensuse_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
            .;ldkO0000Okdl;.
        .;d00xl:^''''''^:ok00d;.
      .d00l'                'o00d.
@@ -286,6 +302,7 @@ dKKKKKKKKKKKK;.;oOKx,..^..;kKKK0.  dKd
         'lkK0xl:;,,,,;:ldO0kl'
             '^:ldxkkkkxdl:^'
 "#,
+        ),
         width: 40,
         primary_color: green,
     }
@@ -293,7 +310,8 @@ dKKKKKKKKKKKK;.;oOKx,..^..;kKKK0.  dKd
 
 fn gentoo_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
          -/oyddmdhs+:.
      -odNMMMMMMMMNNmhy+-`
    -yNMMMMMMMMMMMNNNmmdhy+-
@@ -313,6 +331,7 @@ yMMNNNNNNNmmmmmNNMmhs+/-`
 `/ohdmmddhys+++/:.`
   `-//////:--.
 "#,
+        ),
         width: 38,
         primary_color: magenta,
     }
@@ -320,7 +339,8 @@ yMMNNNNNNNmmmmmNNMmhs+/-`
 
 fn nixos_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
           ::::.    ':::::     ::::'
           ':::::    ':::::.  ::::'
             :::::     '::::.:::::
@@ -339,6 +359,7 @@ fn nixos_logo() -> DistroLogo {
     .::::::::::::::::::.googol'  .::.
           .googol                googol
 "#,
+        ),
         width: 50,
         primary_color: blue,
     }
@@ -346,7 +367,8 @@ fn nixos_logo() -> DistroLogo {
 
 fn void_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
                 __.;=====;.__
             _.=+==++=++=+=+===;.
              -=+++=+===+=+=+++++=_
@@ -366,6 +388,7 @@ fn void_logo() -> DistroLogo {
                 ~|Invnvnvvnvvvnnv}+`
                    -~|{*l}*|~
 "#,
+        ),
         width: 52,
         primary_color: green,
     }
@@ -373,7 +396,8 @@ fn void_logo() -> DistroLogo {
 
 fn alpine_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
        .hddddddddddddddddddddddh.
       :dddddddddddddddddddddddddd:
      /dddddddddddddddddddddddddddd/
@@ -395,6 +419,7 @@ hdddyo+ohddyosdddddddddho+oydddy++ohdddh
       :dddddddddddddddddddddddddd:
        .hddddddddddddddddddddddh.
 "#,
+        ),
         width: 42,
         primary_color: blue,
     }
@@ -402,7 +427,8 @@ hdddyo+ohddyosdddddddddho+oydddy++ohdddh
 
 fn proxmox_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
          .://:`              `://:.
        `hMMMMMMd/          /dMMMMMMh`
         `sMMMMMMMd:      :mMMMMMMMs`
@@ -424,6 +450,7 @@ fn proxmox_logo() -> DistroLogo {
        `hMMMMMMd/          /dMMMMMMh`
          `://:`              `://:`
 "#,
+        ),
         width: 46,
         primary_color: white,
     }
@@ -431,7 +458,8 @@ fn proxmox_logo() -> DistroLogo {
 
 fn linux_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
         #####
        #######
        ##O#O##
@@ -445,6 +473,7 @@ fn linux_logo() -> DistroLogo {
 #####################
   #################
 "#,
+        ),
         width: 26,
         primary_color: white,
     }
@@ -452,7 +481,8 @@ fn linux_logo() -> DistroLogo {
 
 fn cachyos_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
                    -`
                   .o+`
                  `ooo/
@@ -473,6 +503,7 @@ fn cachyos_logo() -> DistroLogo {
  `++:.                           `-/+/
  .`                                 `/
 "#,
+        ),
         width: 40,
         primary_color: green,
     }
@@ -480,7 +511,8 @@ fn cachyos_logo() -> DistroLogo {
 
 fn endeavouros_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
                      ./o.
                    ./sssso-
                  `:osssssss+-
@@ -497,6 +529,7 @@ fn endeavouros_logo() -> DistroLogo {
    ./++++++++++++++++++++++++++++++/:.
   `:::::::::::::::::::::::::------``
 "#,
+        ),
         width: 46,
         primary_color: magenta,
     }
@@ -504,7 +537,8 @@ fn endeavouros_logo() -> DistroLogo {
 
 fn bazzite_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
              .',;::::;,'.
          .';:cccccccccccc:;,.
       .;cccccccccccccccccccccc;.
@@ -525,6 +559,7 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 .:cccccccccccccccccccc:;,..
   '::cccccccccccccc::;,.
 "#,
+        ),
         width: 42,
         primary_color: magenta,
     }
@@ -532,7 +567,8 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 
 fn nobara_logo() -> DistroLogo {
     DistroLogo {
-        art: r#"
+        art: Cow::Borrowed(
+            r#"
              .',;::::;,'.
          .';:cccccccccccc:;,.
       .;cccccccccccccccccccccc;.
@@ -553,7 +589,119 @@ cccccccc;.:odl:.;cccccccccccccc:,.
 .:cccccccccccccccccccc:;,..
   '::cccccccccccccc::;,.
 "#,
+        ),
         width: 42,
         primary_color: red,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_logo_selection_arch() {
+        let logo = get_logo("arch");
+        assert_eq!(logo.width, 40);
+    }
+
+    #[test]
+    fn test_logo_selection_cachyos() {
+        let logo = get_logo("cachyos");
+        assert_eq!(logo.width, 40);
+    }
+
+    #[test]
+    fn test_logo_selection_fedora() {
+        let logo = get_logo("fedora");
+        assert_eq!(logo.width, 42);
+    }
+
+    #[test]
+    fn test_logo_selection_ubuntu() {
+        let logo = get_logo("ubuntu");
+        assert_eq!(logo.width, 42);
+    }
+
+    #[test]
+    fn test_logo_selection_debian() {
+        let logo = get_logo("debian");
+        assert_eq!(logo.width, 35);
+    }
+
+    #[test]
+    fn test_logo_selection_case_insensitive() {
+        let logo1 = get_logo("ARCH");
+        let logo2 = get_logo("Arch");
+        let logo3 = get_logo("arch");
+        assert_eq!(logo1.width, logo2.width);
+        assert_eq!(logo2.width, logo3.width);
+    }
+
+    #[test]
+    fn test_logo_selection_partial_match() {
+        // "archlinux" should match arch
+        let logo = get_logo("archlinux");
+        assert_eq!(logo.width, 40);
+    }
+
+    #[test]
+    fn test_logo_selection_unknown_fallback() {
+        // Unknown distro should fall back to linux logo
+        let logo = get_logo("unknowndistro");
+        assert_eq!(logo.width, 26); // linux_logo width
+    }
+
+    #[test]
+    fn test_logo_selection_bazzite() {
+        let logo = get_logo("bazzite");
+        assert_eq!(logo.width, 42);
+    }
+
+    #[test]
+    fn test_logo_selection_popos() {
+        let logo = get_logo("pop");
+        assert_eq!(logo.width, 42);
+    }
+
+    #[test]
+    fn test_logo_selection_proxmox() {
+        let logo = get_logo("proxmox");
+        assert_eq!(logo.width, 46);
+    }
+
+    #[test]
+    fn test_all_logos_have_valid_width() {
+        let distros = [
+            "arch",
+            "ubuntu",
+            "debian",
+            "fedora",
+            "pop",
+            "manjaro",
+            "mint",
+            "opensuse",
+            "gentoo",
+            "nixos",
+            "void",
+            "alpine",
+            "proxmox",
+            "cachyos",
+            "endeavour",
+            "bazzite",
+            "nobara",
+            "linux",
+        ];
+
+        for distro in distros {
+            let logo = get_logo(distro);
+            assert!(
+                logo.width > 0 && logo.width < 60,
+                "Invalid width {} for {}",
+                logo.width,
+                distro
+            );
+            assert!(!logo.art.is_empty(), "Empty art for {}", distro);
+        }
     }
 }

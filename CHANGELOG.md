@@ -5,6 +5,24 @@ All notable changes to ghostfetch will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-04-10
+
+### Fixed
+- Memory leak in custom ASCII loading (replaced `Box::leak` with `Cow<'static, str>`)
+- GPU parsing safety (replaced `unwrap()` with proper error handling)
+- Terminal size detection bounds validation
+
+### Added
+- Input validation for custom ASCII files (size limit, escape sequence filtering)
+- 22 unit tests covering ANSI handling, truncation, logo selection
+- Documentation under `docs/` (architecture, external-tools, troubleshooting)
+- Threat model section in SECURITY.md
+- Binary download option in install.sh (`--binary` flag)
+
+### Changed
+- Refactored monolithic `info.rs` into modular structure (`src/info/`)
+- Removed dead code paths in RAM speed detection
+
 ## [0.1.0] - 2026-01-07
 
 ### Added
