@@ -1,6 +1,6 @@
 [package]
 name = "ghostfetch"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "A fast, minimal system fetch tool for Linux - inspired by neofetch"
 license = "MIT"
@@ -11,7 +11,7 @@ categories = ["command-line-utilities"]
 [dependencies]
 sysinfo = { version = "0.38", default-features = false, features = ["system", "disk"] }
 colored = "3"
-whoami = { version = "2", default-features = false }
+whoami = "2"
 clap = { version = "4", features = ["derive"] }
 libc = "0.2"
 

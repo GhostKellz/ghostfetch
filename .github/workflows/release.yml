@@ -9,7 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-test:
+    name: Build & Test
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -20,19 +21,51 @@ jobs:
         with:
           targets: x86_64-unknown-linux-gnu
 
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Run clippy
+        run: cargo clippy --release -- -D warnings
+
       - name: Build Release
-        run: |
-          cargo build --release --target x86_64-unknown-linux-gnu
+        run: cargo build --release --target x86_64-unknown-linux-gnu
 
       - name: Run Tests
         run: cargo test
 
+      - name: CLI Smoke Test
+        run: |
+          ./target/x86_64-unknown-linux-gnu/release/ghostfetch --version
+          ./target/x86_64-unknown-linux-gnu/release/ghostfetch --help > /dev/null
+          ./target/x86_64-unknown-linux-gnu/release/ghostfetch --off > /dev/null
+          ./target/x86_64-unknown-linux-gnu/release/ghostfetch --no-color > /dev/null
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghostfetch-binary
+          path: target/x86_64-unknown-linux-gnu/release/ghostfetch
+          retention-days: 1
+
+  release:
+    name: Create Release
+    needs: build-test
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ghostfetch-binary
+          path: release/
+
       - name: Create Release Archive
         run: |
-          mkdir -p release
-          cp target/x86_64-unknown-linux-gnu/release/ghostfetch release/
-          cp README.md LICENSE release/ 2>/dev/null || true
           cd release
+          chmod +x ghostfetch
+          cp ../README.md ../LICENSE . 2>/dev/null || true
           tar -czvf ghostfetch-linux-x86_64.tar.gz ghostfetch README.md LICENSE 2>/dev/null || tar -czvf ghostfetch-linux-x86_64.tar.gz ghostfetch
           sha256sum ghostfetch-linux-x86_64.tar.gz > ghostfetch-linux-x86_64.tar.gz.sha256
 
