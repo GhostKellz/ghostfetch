@@ -5,6 +5,16 @@ All notable changes to ghostfetch will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-04-11
+
+### Fixed
+- Username/hostname detection showing `anonymous@localhost` instead of actual values
+  - Enabled whoami crate default features for proper system call detection
+
+### Changed
+- CI workflow split into separate build/test and release jobs
+- Added formatting check, clippy lints, and CLI smoke tests to CI pipeline
+
 ## [0.1.1] - 2026-04-10
 
 ### Fixed
