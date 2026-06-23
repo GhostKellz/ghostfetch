@@ -1,6 +1,5 @@
-use super::helpers::strip_ansi_codes;
+use super::helpers::{run_cmd, strip_ansi_codes};
 use std::fs;
-use std::process::Command;
 
 /// Monitor display information.
 #[derive(Clone)]
@@ -18,7 +17,7 @@ pub fn get_de() -> String {
 
     // Try to get version for KDE Plasma
     if (de.to_lowercase().contains("kde") || de.to_lowercase().contains("plasma"))
-        && let Ok(output) = Command::new("plasmashell").arg("--version").output()
+        && let Some(output) = run_cmd("plasmashell", &["--version"])
     {
         let version = String::from_utf8_lossy(&output.stdout);
         for line in version.lines() {
@@ -74,7 +73,7 @@ pub fn get_wm() -> String {
                     "xmonad",
                     "spectrwm",
                 ];
-                if let Ok(output) = Command::new("ps").args(["-e", "-o", "comm="]).output() {
+                if let Some(output) = run_cmd("ps", &["-e", "-o", "comm="]) {
                     let procs = String::from_utf8_lossy(&output.stdout).to_lowercase();
                     for wm in &wms {
                         if procs.contains(wm) {
@@ -95,7 +94,7 @@ pub fn get_wm() -> String {
 pub fn get_terminal() -> String {
     // Check for ghostty-specific environment variables (works even inside tmux)
     if std::env::var("GHOSTTY_BIN_DIR").is_ok() || std::env::var("GHOSTTY_RESOURCES_DIR").is_ok() {
-        if let Ok(output) = Command::new("ghostty").arg("--version").output() {
+        if let Some(output) = run_cmd("ghostty", &["--version"]) {
             let version = String::from_utf8_lossy(&output.stdout);
             if let Some(line) = version.lines().next() {
                 return format!("ghostty {}", line.split_whitespace().last().unwrap_or(""));
@@ -108,7 +107,7 @@ pub fn get_terminal() -> String {
     if let Ok(term_prog) = std::env::var("TERM_PROGRAM") {
         let term = term_prog.to_lowercase();
         if term.contains("ghostty") {
-            if let Ok(output) = Command::new("ghostty").arg("--version").output() {
+            if let Some(output) = run_cmd("ghostty", &["--version"]) {
                 let version = String::from_utf8_lossy(&output.stdout);
                 if let Some(line) = version.lines().next() {
                     return format!("ghostty {}", line.split_whitespace().last().unwrap_or(""));
@@ -150,7 +149,7 @@ pub fn get_terminal() -> String {
                 for (proc_name, display_name) in &terminals {
                     if comm == *proc_name || comm.contains(proc_name) {
                         // Try to get version
-                        if let Ok(output) = Command::new(display_name).arg("--version").output() {
+                        if let Some(output) = run_cmd(display_name, &["--version"]) {
                             let version = String::from_utf8_lossy(&output.stdout);
                             if let Some(line) = version.lines().next() {
                                 // Extract version from line
@@ -271,7 +270,7 @@ pub fn get_terminal_font() -> Option<String> {
 pub fn get_multiplexer() -> Option<String> {
     // Check TMUX
     if std::env::var("TMUX").is_ok() {
-        if let Ok(output) = Command::new("tmux").args(["-V"]).output() {
+        if let Some(output) = run_cmd("tmux", &["-V"]) {
             let version = String::from_utf8_lossy(&output.stdout);
             let version = version.trim();
             if !version.is_empty() {
@@ -283,7 +282,7 @@ pub fn get_multiplexer() -> Option<String> {
 
     // Check Zellij
     if std::env::var("ZELLIJ").is_ok() || std::env::var("ZELLIJ_SESSION_NAME").is_ok() {
-        if let Ok(output) = Command::new("zellij").args(["--version"]).output() {
+        if let Some(output) = run_cmd("zellij", &["--version"]) {
             let version = String::from_utf8_lossy(&output.stdout);
             let version = version.trim().replace("zellij ", "");
             if !version.is_empty() {
@@ -335,7 +334,7 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
     }
 
     // Use kscreen-doctor for KDE Plasma (best source)
-    if let Ok(output) = Command::new("kscreen-doctor").arg("-o").output() {
+    if let Some(output) = run_cmd("kscreen-doctor", &["-o"]) {
         // Strip ANSI color codes
         let raw = String::from_utf8_lossy(&output.stdout);
         let kscreen = strip_ansi_codes(&raw);
@@ -412,7 +411,7 @@ pub fn get_monitors() -> Vec<MonitorInfo> {
     // Fallback to xrandr if kscreen-doctor didn't work
     if monitors.is_empty()
         && std::env::var("DISPLAY").is_ok()
-        && let Ok(output) = Command::new("xrandr").args(["--query"]).output()
+        && let Some(output) = run_cmd("xrandr", &["--query"])
     {
         let xrandr = String::from_utf8_lossy(&output.stdout);
         let mut current_output = String::new();

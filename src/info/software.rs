@@ -1,5 +1,5 @@
+use super::helpers::run_cmd;
 use std::fs;
-use std::process::Command;
 
 pub fn get_os_info() -> (String, String) {
     let content = fs::read_to_string("/etc/os-release").unwrap_or_default();
@@ -31,7 +31,7 @@ pub fn get_shell() -> String {
         .unwrap_or_else(|_| "Unknown".to_string());
 
     // Try to get version
-    if let Ok(output) = Command::new(&shell).arg("--version").output() {
+    if let Some(output) = run_cmd(&shell, &["--version"]) {
         let version_str = String::from_utf8_lossy(&output.stdout);
         if let Some(first_line) = version_str.lines().next() {
             // Extract version number
@@ -54,7 +54,7 @@ pub fn get_packages() -> String {
     let mut counts = Vec::new();
 
     // pacman
-    if let Ok(output) = Command::new("pacman").args(["-Qq"]).output() {
+    if let Some(output) = run_cmd("pacman", &["-Qq"]) {
         let count = String::from_utf8_lossy(&output.stdout).lines().count();
         if count > 0 {
             counts.push(format!("{} (pacman)", count));
@@ -62,7 +62,7 @@ pub fn get_packages() -> String {
     }
 
     // flatpak
-    if let Ok(output) = Command::new("flatpak").args(["list", "--app"]).output() {
+    if let Some(output) = run_cmd("flatpak", &["list", "--app"]) {
         let count = String::from_utf8_lossy(&output.stdout).lines().count();
         if count > 0 {
             counts.push(format!("{} (flatpak)", count));
@@ -70,7 +70,7 @@ pub fn get_packages() -> String {
     }
 
     // snap
-    if let Ok(output) = Command::new("snap").args(["list"]).output() {
+    if let Some(output) = run_cmd("snap", &["list"]) {
         let count = String::from_utf8_lossy(&output.stdout)
             .lines()
             .skip(1)
@@ -82,9 +82,7 @@ pub fn get_packages() -> String {
 
     // dpkg (debian/ubuntu)
     if counts.is_empty()
-        && let Ok(output) = Command::new("dpkg-query")
-            .args(["-f", ".\n", "-W"])
-            .output()
+        && let Some(output) = run_cmd("dpkg-query", &["-f", ".\n", "-W"])
     {
         let count = String::from_utf8_lossy(&output.stdout).lines().count();
         if count > 0 {
@@ -94,7 +92,7 @@ pub fn get_packages() -> String {
 
     // rpm (fedora/rhel)
     if counts.is_empty()
-        && let Ok(output) = Command::new("rpm").args(["-qa"]).output()
+        && let Some(output) = run_cmd("rpm", &["-qa"])
     {
         let count = String::from_utf8_lossy(&output.stdout).lines().count();
         if count > 0 {
@@ -250,7 +248,7 @@ pub fn get_editor() -> Option<String> {
     };
 
     // Try to get version
-    if let Ok(output) = Command::new(cmd).arg("--version").output() {
+    if let Some(output) = run_cmd(cmd, &["--version"]) {
         let version_out = String::from_utf8_lossy(&output.stdout);
         let first_line = version_out.lines().next().unwrap_or("");
 

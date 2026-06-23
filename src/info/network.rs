@@ -1,12 +1,9 @@
-use std::process::Command;
+use super::helpers::run_cmd;
 
 pub fn get_network_info() -> Vec<(String, String)> {
     let mut networks = Vec::new();
 
-    if let Ok(output) = Command::new("ip")
-        .args(["-4", "addr", "show", "scope", "global"])
-        .output()
-    {
+    if let Some(output) = run_cmd("ip", &["-4", "addr", "show", "scope", "global"]) {
         let ip_output = String::from_utf8_lossy(&output.stdout);
         let mut current_iface = String::new();
 

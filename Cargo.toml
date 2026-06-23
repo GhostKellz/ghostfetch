@@ -1,6 +1,6 @@
 [package]
 name = "ghostfetch"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 description = "A fast, minimal system fetch tool for Linux - inspired by neofetch"
 license = "MIT"

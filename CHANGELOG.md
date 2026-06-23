@@ -5,6 +5,21 @@ All notable changes to ghostfetch will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-06-23
+
+### Fixed
+- Hang when an external helper command blocks indefinitely. A wedged
+  `kscreen-doctor` (e.g. after KWin's output service gets stuck) would freeze
+  the entire program, since every subprocess was run with an unbounded
+  `.output()` call.
+
+### Changed
+- All external command invocations now run through a `run_cmd` helper that caps
+  each spawn at a 2s timeout, draining output on a worker thread and killing the
+  child if it overruns. A single stuck helper can no longer block the tool, and
+  monitor detection falls back to `xrandr`/EDID when `kscreen-doctor` is
+  unavailable.
+
 ## [0.1.2] - 2026-04-11
 
 ### Fixed

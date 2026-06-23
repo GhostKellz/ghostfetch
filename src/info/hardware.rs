@@ -1,5 +1,5 @@
+use super::helpers::run_cmd;
 use std::fs;
-use std::process::Command;
 use sysinfo::{Disks, System};
 
 pub fn get_cpu(sys: &System) -> String {
@@ -37,7 +37,7 @@ pub fn get_cpu(sys: &System) -> String {
 pub fn get_gpu() -> Vec<String> {
     let mut gpus = Vec::new();
 
-    if let Ok(output) = Command::new("lspci").args(["-mm"]).output() {
+    if let Some(output) = run_cmd("lspci", &["-mm"]) {
         let lspci = String::from_utf8_lossy(&output.stdout);
         for line in lspci.lines() {
             if line.contains("VGA") || line.contains("3D") || line.contains("Display") {
@@ -114,7 +114,7 @@ pub fn get_memory(sys: &System) -> String {
 
 fn get_ram_speed() -> Option<u32> {
     // Try dmidecode (requires root, but might be cached)
-    if let Ok(output) = Command::new("dmidecode").args(["-t", "memory"]).output() {
+    if let Some(output) = run_cmd("dmidecode", &["-t", "memory"]) {
         let dmi = String::from_utf8_lossy(&output.stdout);
         let mut configured_speed: Option<u32> = None;
         let mut base_speed: Option<u32> = None;
